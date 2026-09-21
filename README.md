@@ -16,8 +16,19 @@
 ## 使用方法
 
 ```bat
+# 进入项目目录
 cd 项目目录（如 E:\contest-hub）
+
+# 创建虚拟环境（仅首次运行需要）
+python -m venv venv
+
+# 激活虚拟环境
 venv\Scripts\activate
+
+# 安装依赖（仅首次运行需要）
+pip install -r requirements.txt
+
+# 启动
 python app.py
 ```
 
