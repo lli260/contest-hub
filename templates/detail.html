@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ comp.name }} · Contest Hub</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <a class="back" href="/">← 返回列表</a>
+  <h1>{{ comp.name }}</h1>
+  <span class="stars">{% for i in range(5) %}{{ '⭐' if i < comp.level else '☆' }}{% endfor %}</span>
+  <span class="badge st-{{ STATUS_STYLE[comp.status] }}">{{ comp.status }}</span>
+  <button class="fav-btn {{ 'on' if comp.fav }}" onclick="fav({{ comp.id }}, this)">
+    {{ '⭐ 已收藏' if comp.fav else '☆ 收藏' }}</button>
+</header>
+
+<div class="wrap detail">
+  <section class="card">
+    <div class="meta">
+      <span class="tag tier-{{ comp.tier }}">主办方 {{ comp.tier }} 级</span>
+      <span class="tag">{{ comp.category }}</span>
+      {% for t in comp.tags %}<span class="tag soft">{{ t }}</span>{% endfor %}
+      <span class="org">{{ comp.organizer or '' }}</span>
+    </div>
+    <p class="desc">{{ comp.desc or '暂无简介' }}</p>
+    <div class="dates">
+      📅 比赛：{{ comp.start_date or '常年滚动开赛' }}
+      {% if comp.end_date and comp.end_date != comp.start_date %} ~ {{ comp.end_date }}{% endif %}
+      {% if comp.days_dl is not none %}
+        | 📝 报名截止：{{ comp.reg_deadline }}
+        {% if comp.days_dl >= 0 %}<span class="badge {{ 'danger' if comp.days_dl <= 14 else 'warn' }}">剩 {{ comp.days_dl }} 天</span>
+        {% else %}<span class="badge gray">已截止</span>{% endif %}
+      {% endif %}
+      &nbsp;{% if comp.url and comp.url != '#' %}<a class="go" href="{{ comp.url }}" target="_blank">直达官网 ↗</a>{% endif %}
+    </div>
+
+    <!-- 五维含金量评级 -->
+    <div class="dims">
+      <b>🥇 五维含金量评级（综合 {'★'*comp.level}{'☆'*(5-comp.level)}）：</b>
+      {% for key, label in DIMENSIONS %}
+      <div class="dim">
+        <span class="dim-name">{{ label }}</span>
+        <div class="bar"><div class="fill lv{{ comp[key] if key != 'tier' else TIER_WEIGHTS[comp.tier] }}"
+          style="width: {{ (TIER_WEIGHTS[comp.tier] if key == 'tier' else comp[key]) * 20 }}%"></div></div>
+        <span class="dim-val">{% if key == 'tier' %}{{ '★'*TIER_WEIGHTS[comp.tier] }}（{{ comp.tier }}级）{% else %}{{ '★' * comp[key] }}{% endif %}</span>
+      </div>
+      {% endfor %}
+      <p class="muted small">权重：主办方级别35% · 获奖难度25% · 政策挂钩15% · 行业认可15% · 历史积淀10%</p>
+    </div>
+  </section>
+
+  <div class="cols">
+    <!-- 参赛计划 -->
+    <section class="card">
+      <h3>📅 参赛计划与任务清单</h3>
+      <form method="post" action="/plan/add/{{ comp.id }}" class="inline-form">
+        <input name="title" placeholder="新建计划，如：赛前 30 天冲刺" required>
+        <button type="submit">＋ 建计划</button>
+      </form>
+
+      {% for p in plans %}
+      <div class="plan">
+        <div class="plan-head">
+          <b>{{ p.title }}</b>
+          <span class="muted">{{ p.progress[0] }}/{{ p.progress[1] }} 完成</span>
+          <form method="post" action="/plan/delete/{{ p.id }}" onsubmit="return confirm('删除该计划及其任务？')">
+            <input type="hidden" name="cid" value="{{ comp.id }}">
+            <button class="mini danger">✕</button></form>
+        </div>
+        <ul class="tasks">
+          {% for t in p.tasks %}
+          <li class="{{ 'done' if t.done }}">
+            <form method="post" action="/task/toggle/{{ t.id }}"><input type="hidden" name="cid" value="{{ comp.id }}">
+              <button class="check">{{ '☑' if t.done else '☐' }}</button></form>
+            <span>{{ t.content }}</span>
+            {% if t.due %}<span class="badge soft">{{ t.due }}</span>{% endif %}
+            <form method="post" action="/task/delete/{{ t.id }}" class="right"><input type="hidden" name="cid" value="{{ comp.id }}">
+              <button class="mini danger">✕</button></form>
+          </li>
+          {% endfor %}
+        </ul>
+        <form method="post" action="/task/add/{{ p.id }}" class="inline-form task-add">
+          <input name="content" placeholder="添加任务…" required>
+          <input type="date" name="due">
+          <button type="submit">＋</button>
+        </form>
+      </div>
+      {% else %}<p class="muted">还没有参赛计划，先建一个吧！</p>{% endfor %}
+    </section>
+
+    <!-- 比赛笔记 -->
+    <section class="card">
+      <h3>📝 比赛笔记</h3>
+      <div class="auto-points">
+        <b>🤖 自动生成的重点：</b>
+        <ul>{% for pt in note.auto_list %}<li>{{ pt }}</li>{% endfor %}</ul>
+      </div>
+      <form method="post" action="/comp/{{ comp.id }}">
+        <textarea name="note" rows="9"
+          placeholder="记录你的备赛笔记、心得、资源链接……">{{ note.content }}</textarea>
+        <button type="submit">💾 保存笔记{% if note.updated_at %}（上次更新 {{ note.updated_at }}）{% endif %}</button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<footer>Contest Hub · 数据仅供参考，具体赛程以各官网为准</footer>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

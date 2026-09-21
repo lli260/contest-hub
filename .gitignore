@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.env
+
+# 运行数据（含用户笔记/计划/收藏，切勿提交）
+contest.db
+*.sqlite3
+instance/
+
+# IDE / 编辑器
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
