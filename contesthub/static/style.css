@@ -18,7 +18,11 @@ header .flash { width: 100%; background: rgba(255,255,255,.16); border-radius: 8
   box-shadow: 0 1px 4px rgba(30,40,90,.07); padding: 14px 26px 10px; max-width: 1224px;
   margin-left: auto; margin-right: auto; }
 .tl-title { font-size: 15px; margin-bottom: 6px; }
-.timeline { position: relative; height: 92px; overflow-x: auto; overflow-y: hidden; }
+/* 两行：年度大赛 / 在线赛，避免周赛把轴挤满 */
+.tl-row { display: flex; align-items: flex-start; gap: 10px; }
+.tl-row-label { flex: 0 0 56px; font-size: 12px; color: var(--muted); padding-top: 40px;
+  writing-mode: horizontal-tb; text-align: right; }
+.timeline { position: relative; height: 92px; overflow: visible; flex: 1; min-width: 0; }
 .tl-line { position: absolute; left: 0; right: 0; top: 58px; height: 3px;
   background: linear-gradient(90deg, #dbe4ff, #91a7ff); border-radius: 2px; }
 .tl-today { position: absolute; left: calc((7 / (100 + 7)) * 100%); top: 44px; height: 32px;
@@ -81,6 +85,44 @@ button:hover { filter: brightness(1.08); }
   background: #fff9db; border: 1px solid #ffec99; border-radius: 10px;
   color: #8a6d00; font-size: 13px; }
 .tag.src { background: #d3f9d8; color: #2b8a3e; }
+.tag.verified { background: #d3f9d8; color: #2b8a3e; font-weight: 600; }
+.tag.warn { background: #fff3bf; color: #99700a; font-weight: 600; }
+.tag.todo { background: #e7e9f4; color: #4b5580; }
+.tag.manual { background: #fff3bf; color: #99700a; }
+.st-todo { background: #e7e9f4; color: #4b5580; }
+.group-title { margin: 8px 0 4px; font-weight: 600; color: #666; }
+.sync-status { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px; }
+.sync-row { display: flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 2px 0; }
+.sync-name { flex: 1; color: #555; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex: none; }
+.sync-dot.ok { background: #37b24d; }
+.sync-dot.bad { background: #e8590c; }
+.sync-row .err { color: var(--danger); }
+.warn-text { color: #99700a; }
+.ok-text { color: #2b8a3e; font-weight: 600; }
+#sync-hint.err { color: var(--danger); }
+
+/* 筛选栏补充：日期范围与「显示已结束」 */
+.filters .inline-date { display: flex; align-items: center; gap: 4px; font-size: 12.5px;
+  color: #555; flex: 1 1 220px; }
+.filters .inline-date input { flex: 1; min-width: 110px; }
+.filters .inline-check { display: flex; align-items: center; gap: 4px; font-size: 12.5px; color: #555; }
+.filters .inline-check input { flex: none; }
+
+button.secondary { background: #edf2ff; color: #3b5bdb; }
+button.secondary:hover { background: #dbe4ff; }
+
+/* 数据源健康页表格 */
+table.health { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.health th { text-align: left; color: var(--muted); font-weight: 600; padding: 6px 8px;
+  border-bottom: 1px solid var(--border); white-space: nowrap; }
+table.health td { padding: 6px 8px; border-bottom: 1px dashed var(--border); vertical-align: top; }
+table.health a { color: var(--primary); text-decoration: none; word-break: break-all; }
+table.health .err { color: var(--danger); }
+table.logs td { font-size: 12.5px; }
+.row.gap { gap: 12px; margin-top: 8px; }
+.verify-form { margin: 0; }
+.verify-form button[disabled] { opacity: .65; cursor: default; }
 .tier-S { background: #ffe3e3; color: #c92a2a; font-weight: 700; }
 .tier-A { background: #ffec99; color: #99700a; font-weight: 700; }
 .tier-B { background: #dbe4ff; color: #3b5bdb; }
@@ -141,5 +183,16 @@ button:hover { filter: brightness(1.08); }
   border-radius: 6px; padding: 12px 14px; margin-bottom: 12px; font-size: 14px; }
 .auto-points ul { margin: 8px 0 0 18px; line-height: 1.9; }
 form[action*="comp"] button { margin-top: 10px; }
+
+/* 左侧边栏隐藏 / 显示 */
+.collapse-btn { align-self: flex-end; background: transparent; color: var(--muted);
+  font-size: 12.5px; padding: 2px 8px; }
+.collapse-btn:hover { color: var(--primary); }
+#show-sidebar { display: none; position: fixed; left: 0; top: 50%;
+  transform: translateY(-50%); background: var(--primary); color: #fff;
+  border-radius: 0 8px 8px 0; padding: 10px 9px; font-size: 13.5px; z-index: 20;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+body.hide-aside aside { display: none; }
+body.hide-aside #show-sidebar { display: block; }
 
 footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px 0 30px; }

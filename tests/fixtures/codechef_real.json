@@ -1,0 +1,6 @@
+{"status":"success","present_contests":[
+  {"contest_code":"START261","contest_name":"Starters 261","contest_start_date_iso":"2026-10-21T20:00:00+05:30","contest_end_date_iso":"2026-10-21T22:00:00+05:30","contest_duration":"120"}
+],"future_contests":[
+  {"contest_code":"START262","contest_name":"Starters 262","contest_start_date_iso":"2026-10-28T20:00:00+05:30","contest_end_date_iso":"2026-10-28T22:00:00+05:30","contest_duration":"120"},
+  {"contest_code":"DSAMONDAY025","contest_name":"Monday Munch - DSA Challenge 025 (Rated)","contest_start_date_iso":"2026-10-19T19:00:00+05:30","contest_end_date_iso":"2026-10-19T22:00:00+05:30","contest_duration":"180"}
+]}

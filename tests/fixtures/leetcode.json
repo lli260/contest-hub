@@ -1,0 +1,4 @@
+{"contests":[
+  {"id":500,"title":"第 500 场周赛","title_slug":"weekly-contest-500","duration":5400,"start_time":1893456000,"origin_start_time":1893456000},
+  {"id":499,"title":"第 250 场双周赛","title_slug":"biweekly-contest-250","duration":5400,"start_time":1000000000,"origin_start_time":1000000000}
+]}

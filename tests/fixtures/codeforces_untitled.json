@@ -1,0 +1,5 @@
+{"status":"OK","result":[
+  {"id":2277,"name":"Codeforces Round (Div. 2)","type":"CF","phase":"BEFORE","startTimeSeconds":1792850700,"durationSeconds":7200},
+  {"id":2272,"name":"Codeforces Round (Div. 2)","type":"CF","phase":"BEFORE","startTimeSeconds":1793025300,"durationSeconds":8100},
+  {"id":2278,"name":"Codeforces Round (Div. 3)","type":"CF","phase":"BEFORE","startTimeSeconds":1793284500,"durationSeconds":8100}
+]}

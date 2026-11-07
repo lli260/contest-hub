@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Contest Hub · 比赛查询平台</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <h1>🏆 Contest Hub</h1>
+  <p class="sub">比赛检索 · 多源自动同步 · 五维含金量评级 · 参赛计划 · 任务清单 · 笔记</p>
+  <p class="sub">
+    <a class="go" href="{{ url_for('main.health') }}">🩺 数据源健康</a>
+    &nbsp;|&nbsp;
+    <a class="go" href="{{ url_for('main.calendar_ics') }}">📆 导出全部日程 (.ics)</a>
+    &nbsp;|&nbsp;
+    <a class="go" href="{{ url_for('main.calendar_ics', fav=1) }}">⭐ 仅导出收藏</a>
+  </p>
+
+  {% with msgs = get_flashed_messages() %}
+    {% for m in msgs %}<div class="flash">{{ m }}</div>{% endfor %}
+  {% endwith %}
+</header>
+
+<!-- ============ 时间轴（年度大赛 / 在线赛 分两行） ============ -->
+<div class="timeline-box">
+  <div class="tl-title">🗓️ 比赛时间轴
+    <span class="muted">（点击节点跳到对应比赛卡片；共 {{ total_timeline }} 场在范围内）</span>
+  </div>
+  {% for key, label in [('major', '年度大赛'), ('online', '在线赛')] %}
+  <div class="tl-row">
+    <span class="tl-row-label">{{ label }}</span>
+    <div class="timeline">
+      <div class="tl-line"></div>
+      <div class="tl-today"><span>今天</span></div>
+      {% for t in timeline[key] %}
+        <a class="tl-dot lane-{{ t.lane }}" style="left: {{ t.pos }}%" href="#comp-{{ t.id }}"
+           title="{{ t.name }}（{{ t.when }} · {{ t.status }}）">
+          <span class="tl-pin lv{{ t.level }}"></span>
+          <span class="tl-label">{{ t.name[:12] }}{% if t.name|length > 12 %}…{% endif %}</span>
+        </a>
+      {% else %}<span class="muted tl-empty">该分类当前筛选下暂无可展示的比赛</span>{% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  <div class="tl-scale">
+    <span>-7天</span><span>今天</span><span>+{{ filters.range if filters.range > 0 else 365 }} 天</span>
+  </div>
+</div>
+
+<div class="notice">
+  ℹ️ 信息可信度分级：
+  <span class="tag soft verified">✅ 已人工核实</span>
+  <span class="tag soft warn">⚠️ 日期待核实</span>
+  <span class="tag soft updated">🔄 自动同步（有来源与更新时间）</span>
+  —— 其余以各官网为准；发现错误可到详情页「标记为已核实」。
+</div>
+
+<div class="wrap">
+  <aside id="sidebar">
+    <button class="collapse-btn" type="button" onclick="toggleSidebar()" title="隐藏侧栏">⟨ 隐藏侧栏</button>
+
+    <div class="card">
+      <h3>🔄 赛事自动同步</h3>
+      <div class="crawl-form" id="sync-panel">
+        <button type="button" class="wide" onclick="syncNow('all', this)">🌐 全部同步（{{ source_count }} 个来源）</button>
+        {% for group, items in groups %}
+          <p class="muted small group-title">{{ group }}</p>
+          <div class="row">
+            {% for s in items %}
+              <button type="button" onclick="syncNow('{{ s.key }}', this)"
+                      title="{{ s.homepage }}{% if s.experimental %}（该站反爬，仅做入口与可达性检测）{% endif %}">
+                {{ s.label }}{% if s.experimental %} ⚗️{% endif %}</button>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <p class="muted small" id="sync-hint">
+          上次同步：{{ sync.last_run or '尚未同步' }} · 后台每 {{ sync.interval_hours }} 小时自动同步
+        </p>
+        <div class="sync-status">
+          {% for r in sync.sources %}
+            <div class="sync-row" title="{{ r.error or '' }}">
+              <span class="sync-dot {{ 'ok' if r.ok else 'bad' }}"></span>
+              <span class="sync-name">{{ r.label }}</span>
+              {% if r.ok %}<span class="muted small">+{{ r.added }}/~{{ r.updated }} · {{ r.count }} 条</span>
+                {% if r.count < 1 %}<span class="muted small warn-text">⚠️ 未见赛程</span>{% endif %}
+              {% else %}<span class="muted small err">{{ r.error or '不可用' }}</span>{% endif %}
+              <span class="muted small">{{ (r.ran_at or '')[5:16] }}</span>
+            </div>
+          {% else %}<p class="muted small">还没有同步记录，点击上方按钮试试。</p>{% endfor %}
+        </div>
+        <p class="muted small">
+          <a href="{{ url_for('main.health') }}">查看数据源健康详情 →</a>
+        </p>
+      </div>
+
+      <details class="manual-add">
+        <summary>➕ 手动添加比赛</summary>
+        <form method="post" action="/comp/add">
+          <input name="name" placeholder="比赛名称 *" required>
+          <input name="category" placeholder="类别，如 算法竞赛">
+          <input name="organizer" placeholder="主办方">
+          <label>开始 <input type="date" name="start_date"></label>
+          <label>结束 <input type="date" name="end_date"></label>
+          <label>报名截止 <input type="date" name="reg_deadline"></label>
+          <input name="url" placeholder="官网链接 https://...">
+          <select name="tier">
+            <option value="S">主办方 S级（国家部委/顶级国际赛）</option>
+            <option value="A" selected>A级（省厅/大厂）</option>
+            <option value="B">B级（学会/协会）</option>
+            <option value="C">C级（校级/商业）</option>
+          </select>
+          <div class="dim-row">
+            <span>获奖难度</span><input type="number" name="s_difficulty" min="1" max="5" value="3">
+            <span>历史积淀</span><input type="number" name="s_history" min="1" max="5" value="3">
+            <span>政策挂钩</span><input type="number" name="s_policy" min="1" max="5" value="3">
+            <span>行业认可</span><input type="number" name="s_industry" min="1" max="5" value="3">
+          </div>
+          <textarea name="desc" rows="2" placeholder="简介"></textarea>
+          <button class="wide">保存</button>
+        </form>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3>⏰ 14天内报名截止</h3>
+      {% for c, dl in deadline_soon %}
+        <div class="soon-item">
+          <a href="#comp-{{ c.id }}">{{ c.name }}</a>
+          <span class="badge danger">剩 {{ dl }} 天</span>
+        </div>
+      {% else %}<p class="muted">暂无紧急截止的比赛 🎉</p>{% endfor %}
+    </div>
+
+    <div class="card stats">
+      <h3>📊 统计</h3>
+      <p>符合条件的 <b>{{ comps|length }}</b> 场 / 库内共 {{ all_total }} 场</p>
+      <p class="muted small">
+        自动同步 {{ sync.live }} 场 · 已隐藏过期 {{ sync.hidden }} 场
+      </p>
+      <p><a href="{{ url_for('main.index', fav=0 if filters.fav else 1) }}">
+        {% if filters.fav %}📄 查看全部{% else %}⭐ 只看收藏{% endif %}</a></p>
+    </div>
+  </aside>
+  <button id="show-sidebar" type="button" onclick="toggleSidebar()" title="显示侧栏">⟩</button>
+
+  <main>
+    <form class="filters card" method="get">
+      <input type="text" name="q" value="{{ filters.q }}" placeholder="🔍 搜索名称 / 标签 / 描述 / 主办方">
+      <select name="range">
+        <option value="30"  {{ 'selected' if filters.range==30 }}>未来 1 个月</option>
+        <option value="90"  {{ 'selected' if filters.range==90 }}>未来 3 个月</option>
+        <option value="180" {{ 'selected' if filters.range==180 }}>未来 6 个月</option>
+        <option value="365" {{ 'selected' if filters.range==365 }}>未来 12 个月</option>
+        <option value="0"   {{ 'selected' if filters.range==0 }}>不限时间</option>
+      </select>
+      <select name="status">
+        <option value="">全部状态</option>
+        {% for s in STATUS_CHOICES %}
+          <option {{ 'selected' if s==filters.status }}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      <select name="category">
+        <option value="">全部类别</option>
+        {% for c in categories %}
+          <option {{ 'selected' if c==filters.category }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+      <select name="source">
+        <option value="">全部来源</option>
+        {% for key, label in SOURCE_LABELS.items() %}
+          {% if counts.get(key) %}
+          <option value="{{ key }}" {{ 'selected' if key==filters.source }}>{{ label }}（{{ counts[key] }}）</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+      <select name="tier">
+        <option value="">任意主办方级别</option>
+        {% for k, v in TIER_WEIGHTS.items() %}
+          <option value="{{ k }}" {{ 'selected' if k==filters.tier }}>{{ k }} 级主办方</option>
+        {% endfor %}
+      </select>
+      <select name="min_level">
+        <option value="0" {{ 'selected' if not filters.min_level }}>任意含金量</option>
+        <option value="3" {{ 'selected' if filters.min_level==3 }}>★★★ 以上</option>
+        <option value="4" {{ 'selected' if filters.min_level==4 }}>★★★★ 以上</option>
+        <option value="5" {{ 'selected' if filters.min_level==5 }}>★★★★★ 顶级</option>
+      </select>
+      <select name="sort">
+        <option value="deadline" {{ 'selected' if filters.sort=='deadline' }}>按报名截止排序</option>
+        <option value="level" {{ 'selected' if filters.sort=='level' }}>按含金量排序</option>
+        <option value="start" {{ 'selected' if filters.sort=='start' }}>按开赛时间排序</option>
+        <option value="updated" {{ 'selected' if filters.sort=='updated' }}>按更新时间排序</option>
+      </select>
+      <label class="inline-date">开赛范围
+        <input type="date" name="from" value="{{ filters.date_from }}">
+        ~ <input type="date" name="to" value="{{ filters.date_to }}">
+      </label>
+      <label class="inline-check">
+        <input type="checkbox" name="ended" value="1" {{ 'checked' if filters.ended }}> 显示已结束
+      </label>
+      <button type="submit">筛选</button>
+    </form>
+
+    {% for c in comps %}
+    <div class="card comp" id="comp-{{ c.id }}">
+      <div class="comp-head">
+        <span class="stars">{% for i in range(5) %}{{ '⭐' if i < c.level else '☆' }}{% endfor %}</span>
+        <a class="comp-name" href="/comp/{{ c.id }}">{{ c.name }}</a>
+        <span class="badge st-{{ STATUS_STYLE.get(c.status, 'gray') }}">{{ c.status }}</span>
+        <button type="button" class="fav-btn {{ 'on' if c.fav }}" onclick="fav({{ c.id }}, this)">
+          {{ '⭐ 已收藏' if c.fav else '☆ 收藏' }}</button>
+      </div>
+      <div class="meta">
+        <span class="tag tier-{{ c.tier }}">主办方 {{ c.tier }} 级</span>
+        <span class="tag">{{ c.category }}</span>
+        <span class="org">{{ c.organizer or '' }}</span>
+        <span class="tag soft src">{{ SOURCE_LABELS.get(c.source, c.source) }}</span>
+        <span class="tag soft {{ c.verify_style }}">{{ c.verify_label }}</span>
+        {% if c.last_checked %}<span class="tag soft updated" title="信息最后核实日期">更新于 {{ c.last_checked }}{% if c.stale %} · ⚠️ 可能过期{% endif %}</span>{% endif %}
+        {% if c.hidden %}<span class="tag soft warn">已从来源下架</span>{% endif %}
+      </div>
+      <p class="desc">{{ c.desc or '暂无简介' }}</p>
+      <div class="dates">
+        {% if c.has_time %}
+          📅 <b>{{ c.when_text }}</b>（北京时间，约 {{ c.duration_text }}）
+        {% elif c.start_date %}
+          📅 比赛：{{ c.start_date }}{% if c.end_date and c.end_date != c.start_date %} ~ {{ c.end_date }}{% endif %}
+          {% if c.days_start is not none and c.days_start >= 0 %}<span class="badge soft">还有 {{ c.days_start }} 天开赛</span>{% endif %}
+        {% elif c.end_date %}
+          📅 截止：{{ c.end_date }}
+        {% else %}
+          📅 日期待官网公布
+        {% endif %}
+        {% if c.ratings %}| 📈 {{ c.ratings }}{% endif %}
+        {% if c.days_dl is not none %}
+          | 📝 报名截止：<b>{{ c.reg_deadline }}</b>
+          {% if c.days_dl >= 0 %}<span class="badge {{ 'danger' if c.days_dl <= 14 else 'warn' }}">剩 {{ c.days_dl }} 天</span>
+          {% else %}<span class="badge gray">已截止</span>{% endif %}
+        {% endif %}
+        {% if c.url and c.url != '#' %}<a class="go" href="{{ c.url }}" target="_blank" rel="noopener">直达官网 ↗</a>{% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="card"><p class="muted">没有符合条件的比赛。试试放宽筛选、勾选「显示已结束」，或点击「全部同步」。</p></div>
+    {% endfor %}
+  </main>
+</div>
+
+<footer>Contest Hub · 数据来自各平台官方接口与人工整理 · 赛程以官网为准 · 含金量评级为辅助参考</footer>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

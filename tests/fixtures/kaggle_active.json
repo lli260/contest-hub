@@ -1,0 +1,23 @@
+{"totalResults":12,"competitions":[
+  {"id":154281,"competitionName":"rsna-knee-abnormality-detection","title":"RSNA Knee Abnormality Detection",
+   "briefDescription":"Create a model that can detect knee abnormalities based on multimodal imaging data",
+   "dateEnabled":"2026-08-05T17:00:00.000Z","deadline":"2026-10-22T23:59:00Z",
+   "hostName":"Radiological Society of North America","totalTeams":6164,"maxTeamSize":5,"maxDailySubmissions":5,"numScoredSubmissions":2,
+   "hasLeaderboard":true,"reward":{"id":"USD","quantity":77000},
+   "evaluationAlgorithm":{"id":25,"name":"Roc Auc Score"},
+   "categories":[{"name":"image","fullPath":"data type > image","displayName":"Image"}]},
+  {"id":133468,"competitionName":"arc-prize-2026-arc-agi-3","title":"ARC Prize 2026 - ARC-AGI-3",
+   "briefDescription":"Create an AI capable of fluid intelligence",
+   "dateEnabled":"2026-03-26T00:00:00.000Z","deadline":"2026-11-02T23:59:00Z",
+   "hostName":"Abstraction and Reasoning Corpus","totalTeams":4447,"maxTeamSize":8,
+   "hasLeaderboard":true,
+   "reward":{"id":"USD","quantity":850000,"clarification":"$150,000 Progress Prize plus $700,000 bonus"},
+   "categories":[{"name":"tabular","fullPath":"data type > tabular","displayName":"Tabular"}]},
+  {"id":9001,"competitionName":"knowledge-only-competition","title":"Kidney Health Survey",
+   "briefDescription":"Answer survey questions about kidney health","deadline":"2027-03-01T23:59:00Z",
+   "hostName":"Indiana University","totalTeams":80,"maxTeamSize":1,"reward":"Knowledge"},
+  {"id":9002,"competitionName":"finished-one","title":"Old Comp","briefDescription":"x",
+   "deadline":"2001-01-01T00:00:00Z","reward":"Knowledge"},
+  {"id":154281,"competitionName":"rsna-knee-abnormality-detection","title":"RSNA Knee Abnormality Detection",
+   "briefDescription":"duplicate page","deadline":"2026-10-22T23:59:00Z","reward":{"id":"USD","quantity":77000}}
+]}

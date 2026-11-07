@@ -1,22 +1,47 @@
-# Python
+# ---- Python 生成文件 ----
 __pycache__/
 *.py[cod]
-venv/
+*$py.class
+build/
+dist/
+wheels/
+*.egg-info/
+
+# ---- 虚拟环境 ----
 .venv/
-.env
 
-# 运行数据（含用户笔记/计划/收藏，切勿提交）
-contest.db
+# ---- 本地运行时数据 ----
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
 *.sqlite3
-instance/
+scratch.db
+.probe/
 
-# IDE / 编辑器
+# ---- 测试临时产物 ----
+.pytest_cache/
+pytest-cache-files-*/
+tests/.tmp/
+_t/
+.tmp-pytest/
+
+# ---- 本地环境变量 ----
+.env
+.env.*
+!.env.example
+
+# ---- 覆盖率 / 缓存 ----
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+
+# ---- 编辑器 / 系统 ----
 .vscode/
 .idea/
-
-# 系统文件
+*.swp
 .DS_Store
 Thumbs.db
-
-# 日志
-*.log

@@ -1,0 +1,28 @@
+# Contest Hub 编辑器统一配置
+# 目标：跨编辑器保持 UTF-8、LF、统一缩进，避免 Windows CRLF 造成 diff 噪声。
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+# Markdown 行尾两个空格是有意义的换行，不自动清理
+trim_trailing_whitespace = false
+
+[*.{html,css,js}]
+indent_size = 2
+
+[*.bat]
+end_of_line = crlf
+
+[*.ps1]
+end_of_line = crlf

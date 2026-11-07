@@ -10,9 +10,14 @@
   <a class="back" href="/">← 返回列表</a>
   <h1>{{ comp.name }}</h1>
   <span class="stars">{% for i in range(5) %}{{ '⭐' if i < comp.level else '☆' }}{% endfor %}</span>
-  <span class="badge st-{{ STATUS_STYLE[comp.status] }}">{{ comp.status }}</span>
-  <button class="fav-btn {{ 'on' if comp.fav }}" onclick="fav({{ comp.id }}, this)">
+  <span class="badge st-{{ STATUS_STYLE.get(comp.status, 'gray') }}">{{ comp.status }}</span>
+  <button type="button" class="fav-btn {{ 'on' if comp.fav }}" onclick="fav({{ comp.id }}, this)">
     {{ '⭐ 已收藏' if comp.fav else '☆ 收藏' }}</button>
+  <form method="post" action="/verify/{{ comp.id }}" class="inline-form verify-form">
+    <input type="hidden" name="next" value="/comp/{{ comp.id }}">
+    <button class="mini" {{ 'disabled' if comp.verify_status == 'verified' }}>
+      {{ '✅ 已核实' if comp.verify_status == 'verified' else '✅ 标记为已核实' }}</button>
+  </form>
 </header>
 
 <div class="wrap detail">
@@ -22,17 +27,38 @@
       <span class="tag">{{ comp.category }}</span>
       {% for t in comp.tags %}<span class="tag soft">{{ t }}</span>{% endfor %}
       <span class="org">{{ comp.organizer or '' }}</span>
+      <span class="tag soft src">来源：{{ SOURCE_LABELS.get(comp.source, comp.source) }}</span>
+      <span class="tag soft {{ comp.verify_style }}">{{ comp.verify_label }}</span>
+      {% if comp.last_checked %}<span class="tag soft updated">更新于 {{ comp.last_checked }}{% if comp.stale %} · ⚠️ 可能过期{% endif %}</span>{% endif %}
+      {% if comp.hidden %}<span class="tag soft warn">已从来源下架</span>{% endif %}
     </div>
     <p class="desc">{{ comp.desc or '暂无简介' }}</p>
     <div class="dates">
-      📅 比赛：{{ comp.start_date or '常年滚动开赛' }}
-      {% if comp.end_date and comp.end_date != comp.start_date %} ~ {{ comp.end_date }}{% endif %}
+      {% if comp.has_time %}
+        📅 比赛时间：<b>{{ comp.when_text }}</b>（北京时间，约 {{ comp.duration_text }}）
+      {% elif comp.start_date %}
+        📅 比赛：{{ comp.start_date }}
+        {% if comp.end_date and comp.end_date != comp.start_date %} ~ {{ comp.end_date }}{% endif %}
+      {% elif comp.end_date %}
+        📅 截止时间：{{ comp.end_date }}
+      {% else %}
+        📅 赛程日期尚未公布，请关注官网通知
+      {% endif %}
       {% if comp.days_dl is not none %}
         | 📝 报名截止：{{ comp.reg_deadline }}
         {% if comp.days_dl >= 0 %}<span class="badge {{ 'danger' if comp.days_dl <= 14 else 'warn' }}">剩 {{ comp.days_dl }} 天</span>
         {% else %}<span class="badge gray">已截止</span>{% endif %}
       {% endif %}
-      &nbsp;{% if comp.url and comp.url != '#' %}<a class="go" href="{{ comp.url }}" target="_blank">直达官网 ↗</a>{% endif %}
+      {% if comp.ratings %}| 📈 {{ comp.ratings }}{% endif %}
+      &nbsp;{% if comp.url and comp.url != '#' %}<a class="go" href="{{ comp.url }}" target="_blank" rel="noopener">直达官网 ↗</a>{% endif %}
+    </div>
+
+    <div class="row gap">
+      {% if siblings %}
+        <span class="muted small">同一比赛的其他来源记录：
+        {% for s in siblings %}<a href="/comp/{{ s.id }}">{{ SOURCE_LABELS.get(s.source, s.source) }}</a>{% if not loop.last %}、{% endif %}{% endfor %}
+        </span>
+      {% endif %}
     </div>
 
     <!-- 五维含金量评级 -->
@@ -105,7 +131,7 @@
   </div>
 </div>
 
-<footer>Contest Hub · 数据仅供参考，具体赛程以各官网为准</footer>
+<footer>Contest Hub · 赛程以各官网为准</footer>
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+{"perPage":20,"count":1393,"result":[
+  {"id":364653,"startTime":1792821600,"endTime":1792839600,"name":"【LGR-311-Div.2】洛谷 10 月月赛 IV &「LDOI」Round #2","method":4,"visibility":1,"rated":3,"host":{"id":1000,"name":"洛谷官方团队","isPremium":true},"squad":false,"problemCount":4},
+  {"id":345405,"startTime":1792801800,"endTime":1792814400,"name":"【LGR-312-Div.3】洛谷基础赛 #41 & 奶龙 OI Round 3","method":4,"visibility":1,"rated":3,"host":{"id":1000,"name":"洛谷官方团队"},"squad":false},
+  {"id":366008,"startTime":1793250000,"endTime":1793268000,"name":"[ICPC2019 Nanchang R] ICPC 2019 区域赛南昌站重现赛","method":2,"visibility":1,"rated":1,"host":{"id":1000,"name":"洛谷官方团队"},"squad":true},
+  {"id":300001,"startTime":1500000000,"endTime":1500010000,"name":"很久以前的比赛","method":1,"visibility":1,"rated":0,"host":{"id":1,"name":"某团队"},"squad":false}
+]}

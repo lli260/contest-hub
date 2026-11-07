@@ -1,0 +1,4 @@
+{"status":"OK","result":[
+  {"id":1900,"name":"Codeforces Round 999 (Div. 1)","phase":"BEFORE","startTimeSeconds":1893456000,"durationSeconds":7200},
+  {"id":1899,"name":"Codeforces Round 998","phase":"CODING","startTimeSeconds":1890000000,"durationSeconds":7200},
+  {"id":1898,"name":"Codeforces Round 997","phase":"FINISHED","startTimeSeconds":1700000000,"durationSeconds":7200}]}

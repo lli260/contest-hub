@@ -1,0 +1,8 @@
+{"count":104,"page_size":16,"page":1,"results":[
+  {"id":295,"name":"第十七届蓝桥杯（人工智能应用）模拟赛3期-职业组","subject":"人工智能",
+   "open_at":"2026-02-27T10:00:00+08:00","end_at":"2026-03-08T23:59:59+08:00",
+   "html_url":"/contests/ai-2026-zy-3/challenges/","slug":"ai-2026-zy-3","users_count":75,"status":"finished"},
+  {"id":400,"name":"第十七届蓝桥杯（软件赛）省赛模拟-大学组","subject":"程序设计",
+   "open_at":"2027-04-01T09:00:00+08:00","end_at":"2027-04-12T18:00:00+08:00",
+   "html_url":"/contests/code-2027-dx-1/challenges/","slug":"code-2027-dx-1","users_count":1200,"status":"upcoming"}
+]}

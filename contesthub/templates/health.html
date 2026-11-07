@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>数据源健康 · Contest Hub</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <a class="back" href="/">← 返回列表</a>
+  <h1>🩺 数据源健康</h1>
+  <p class="sub">每个来源最近一次的同步结果、错误原因与累计成功率。同步失败时卡片会保留上一次成功抓到的赛程。</p>
+</header>
+
+<div class="wrap detail">
+  <section class="card">
+    <div class="meta">
+      <span class="tag soft">库内 <b>{{ sync.total }}</b> 场</span>
+      <span class="tag soft">自动同步 <b>{{ sync.live }}</b> 场</span>
+      <span class="tag soft">已隐藏过期 <b>{{ sync.hidden }}</b> 场</span>
+      <span class="tag soft">上次同步 {{ sync.last_run or '尚未同步' }}</span>
+      {% if sync.running %}<span class="tag soft warn">正在同步…</span>{% endif %}
+    </div>
+    <p class="muted small">后台自动同步间隔：{{ sync.interval_hours }} 小时。反爬站点（牛客 / 天池）只提供入口与可达性说明，不会被计为「抓取成功」。</p>
+    <p class="row gap">
+      <button type="button" onclick="probeSources(this)">🔄 立即同步全部来源</button>
+      <button type="button" class="secondary" onclick="probeSources(this, true)">🩺 实时诊断（不写库）</button>
+    </p>
+    <div id="probe-result" class="muted small"></div>
+  </section>
+
+  {% for group, items in groups %}
+  <section class="card">
+    <h3>{{ group }}</h3>
+    <table class="health">
+      <thead>
+        <tr><th>来源</th><th>最近结果</th><th>新增/更新</th><th>累计成功</th><th>累计失败</th><th>最后成功</th><th>官网</th></tr>
+      </thead>
+      <tbody>
+        {% for r in sync.sources if r.source in items|map(attribute='key')|list %}
+        <tr>
+          <td>{{ r.label }}</td>
+          <td>
+            <span class="sync-dot {{ 'ok' if r.ok else 'bad' }}"></span>
+            {% if r.ok %}<span class="ok-text">成功</span>
+              {% if r.count == 0 %}<span class="muted small">（官网暂无可抓取场次）</span>{% endif %}
+            {% else %}<span class="err">{{ r.error or '不可用' }}</span>{% endif %}
+          </td>
+          <td>+{{ r.added }} / ~{{ r.updated }}</td>
+          <td>{{ r.ok_total }}</td>
+          <td>{{ r.fail_total }}</td>
+          <td class="muted">{{ r.last_ok or '—' }}</td>
+          <td>{% for s in items if s.key == r.source %}<a href="{{ s.homepage }}" target="_blank" rel="noopener">{{ s.homepage }}</a>{% endfor %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endfor %}
+
+  <section class="card">
+    <h3>📜 最近同步日志</h3>
+    <table class="health logs">
+      <thead><tr><th>时间</th><th>来源</th><th>结果</th><th>条数</th><th>说明</th></tr></thead>
+      <tbody>
+      {% for r in logs %}
+        <tr>
+          <td class="muted">{{ r.ran_at }}</td>
+          <td>{{ r.label }}</td>
+          <td>{{ '✅' if r.ok else '❌' }}</td>
+          <td>+{{ r.added }}/~{{ r.updated }} · {{ r.count }}</td>
+          <td class="muted small">
+            {% if r.ok and r.count < 1 %}<span class="warn-text">未见赛程</span>{% endif %}
+            {{ r.error or '' }}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">还没有同步记录</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<footer>Contest Hub · 数据源健康检查</footer>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

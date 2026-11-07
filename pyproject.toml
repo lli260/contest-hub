@@ -1,0 +1,25 @@
+[project]
+name = "contest-hub"
+version = "0.2.0"
+description = "比赛查询与备赛管理平台 Contest Hub（多源自动同步 · 五维含金量评级 · 备赛管理）"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1",
+    "requests>=2.32",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+# 不使用 pytest 自带的 tmp_path 清理逻辑（某些 Windows 环境下对临时目录
+# 的枚举会被拒绝），测试自己用 mkdir 创建目录，见 tests/conftest.py
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.uv]
+package = false
